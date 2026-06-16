@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BigQuery Release Notes Hub</title>
+    <meta name="description" content="A premium tracker for Google Cloud BigQuery release notes. Easily filter, search, and tweet about updates.">
+    
+    <!-- SEO & Social Meta Tags -->
+    <meta property="og:title" content="BigQuery Release Notes Hub">
+    <meta property="og:description" content="Stay up to date with Google Cloud BigQuery releases and share updates on Twitter.">
+    <meta property="og:type" content="website">
+    
+    <!-- Google Fonts & FontAwesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Background Elements -->
+    <div class="bg-gradient-glow top-left"></div>
+    <div class="bg-gradient-glow bottom-right"></div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo-container">
+                <div class="bq-logo-icon">
+                    <i class="fa-solid fa-database"></i>
+                    <i class="fa-solid fa-magnifying-glass search-accent"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>BigQuery</h1>
+                    <span class="subtitle">Release Notes Hub</span>
+                </div>
+            </div>
+            
+            <div class="header-actions">
+                <button id="refresh-btn" class="btn btn-primary" title="Refresh Release Notes">
+                    <i class="fa-solid fa-arrows-rotate spinner-icon"></i>
+                    <span>Refresh</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="app-main">
+            <!-- Left Side: Notes List and Filters -->
+            <section class="notes-section">
+                <!-- Search & Filters Bar -->
+                <div class="filters-bar">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input type="text" id="search-input" placeholder="Search release notes (e.g. Gemini, SQL, partition)..." autocomplete="off">
+                        <button id="clear-search-btn" class="clear-btn" style="display: none;">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="tags-filter">
+                        <button class="tag-filter-btn active" data-type="all">All Updates</button>
+                        <button class="tag-filter-btn" data-type="Feature"><span class="dot feature"></span>Features</button>
+                        <button class="tag-filter-btn" data-type="Issue"><span class="dot issue"></span>Issues</button>
+                        <button class="tag-filter-btn" data-type="Changed"><span class="dot changed"></span>Changes/Fixes</button>
+                    </div>
+                </div>
+
+                <!-- Feed Loading & Error States -->
+                <div id="loader" class="state-container hidden">
+                    <div class="spinner-large"></div>
+                    <p>Fetching the latest release notes from Google Cloud...</p>
+                </div>
+
+                <div id="error-container" class="state-container error-state hidden">
+                    <i class="fa-solid fa-triangle-exclamation error-icon"></i>
+                    <h3>Failed to load release notes</h3>
+                    <p id="error-message">Unknown error occurred</p>
+                    <button id="retry-btn" class="btn btn-secondary">
+                        <i class="fa-solid fa-rotate-right"></i> Retry
+                    </button>
+                </div>
+
+                <div id="empty-state" class="state-container hidden">
+                    <i class="fa-regular fa-folder-open empty-icon"></i>
+                    <h3>No matching updates found</h3>
+                    <p>Try adjusting your search terms or filters.</p>
+                </div>
+
+                <!-- Notes Container -->
+                <div id="notes-list" class="notes-list">
+                    <!-- Dynamic Release Notes Cards Inject Here -->
+                </div>
+            </section>
+
+            <!-- Right Side: Tweet Composer / Details Panel -->
+            <aside class="composer-sidebar">
+                <div class="sidebar-sticky">
+                    <div class="composer-card">
+                        <div class="composer-header">
+                            <div class="composer-title">
+                                <i class="fa-brands fa-x-twitter twitter-icon"></i>
+                                <h2>Share Update</h2>
+                            </div>
+                            <button id="close-composer-btn" class="close-composer-btn" aria-label="Close panel">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="composer-body">
+                            <!-- Select Note Prompt (Shown when no note is selected) -->
+                            <div id="composer-prompt" class="composer-prompt">
+                                <div class="prompt-icon-wrapper">
+                                    <i class="fa-solid fa-arrow-pointer animate-bounce"></i>
+                                </div>
+                                <h3>Select an Update</h3>
+                                <p>Click any release note card on the left to customize and tweet about it.</p>
+                            </div>
+
+                            <!-- Tweet Editor (Hidden by default, shown when note is selected) -->
+                            <div id="composer-editor" class="composer-editor hidden">
+                                <div class="selected-note-preview">
+                                    <span id="preview-badge" class="badge">Feature</span>
+                                    <span id="preview-date" class="date">June 15, 2026</span>
+                                    <p id="preview-text-summary" class="preview-text">Selected update text preview goes here...</p>
+                                </div>
+                                
+                                <div class="textarea-container">
+                                    <label for="tweet-textarea">Compose your post:</label>
+                                    <textarea id="tweet-textarea" rows="8" placeholder="What would you like to tweet?"></textarea>
+                                </div>
+
+                                <div class="composer-footer">
+                                    <div class="char-count-container">
+                                        <span id="char-count">0</span>/280
+                                    </div>
+                                    <button id="tweet-btn" class="btn btn-tweet">
+                                        <i class="fa-brands fa-x-twitter"></i>
+                                        <span>Post to X</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast hidden">
+        <i class="fa-solid fa-circle-check toast-icon"></i>
+        <span id="toast-message">Success message!</span>
+    </div>
+
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
